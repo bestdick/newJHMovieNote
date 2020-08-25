@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "461535663279",
+    "firebase_url": "https://jhmovienotefcm.firebaseio.com",
+    "project_id": "jhmovienotefcm",
+    "storage_bucket": "jhmovienotefcm.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:461535663279:android:b4398ef12561dfd157705a",
+        "android_client_info": {
+          "package_name": "com.parkbros.jhmovienote"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "461535663279-imrufiemeicp0i8t5rdos34dm1vmkf6m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.parkbros.jhmovienote",
+            "certificate_hash": "be24f2a06c5b11c41cdd63866a1ec0c91851fcf6"
+          }
+        },
+        {
+          "client_id": "461535663279-p57biluj4j1ibhlk3nthhpg93p8mpavk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7Us-pYi4jspOyDIHgvF34Js0-YIJbSP4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "461535663279-p57biluj4j1ibhlk3nthhpg93p8mpavk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+
+
+    <color name ="colorCrimsonRed">#990000</color>
+    <color name ="colorSoftCrimsonRed">#F15555</color>
+    <color name ="colorContrastCrimson">#dede00</color>
+
+
+    <color name="colorWhite">#ffffff</color>
+
+    <color name="colorYellowLetter">#FFF300</color>
+    <color name="colorDarkLetter">#343434</color>
+    <color name="colorLightLetter">#A4A4A4</color>
+
+
+    <color name="colorBlack">#000000</color>
+    <color name="colorDarkGray">#464646</color>
+    <color name="colorMediumGray">#D2D2D2</color>
+    <color name="colorLightGray">#DFDFDB</color>
+    <color name="colorLigherGray">#E7E7E7</color>
+    <color name= "colorLightestGray">#F4F4F4</color>
+
+    <color name="colorMediumLightGray">#EBEBEB</color>
+</resources>
