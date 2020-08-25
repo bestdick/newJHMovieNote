@@ -26,7 +26,7 @@ public class BoxOfficeBackgroundTask extends AsyncTask<String, Integer, String> 
     ProgressBar progressBar;
     BoxOfficeListAdapter boxOfficeListAdapter;
 
-
+//hello world
     public BoxOfficeBackgroundTask(Context context, ListView listView, ArrayList<BoxOfficeBean> list, ProgressBar progressBar, BoxOfficeListAdapter boxOfficeListAdapter) {
         this.context = context;
         this.listView = listView;
