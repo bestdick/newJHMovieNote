@@ -3,7 +3,7 @@ package com.Beans;
 import android.net.Uri;
 
 public class WriteBean {
-
+    String isNew;
     String type; // image , text , title, empty
 
     String text;
@@ -16,6 +16,14 @@ public class WriteBean {
     String rotation;
     String width;
     String height;
+
+    public String getIsNew() {
+        return isNew;
+    }
+
+    public void setIsNew(String isNew) {
+        this.isNew = isNew;
+    }
 
     public String getType() {
         return type;
@@ -89,7 +97,8 @@ public class WriteBean {
         this.height = height;
     }
 
-    public WriteBean(String type, String text, String align, String fontsize, Uri imageUri, String imageName, String rotation, String width, String height) {
+    public WriteBean(String isNew , String type, String text, String align, String fontsize, Uri imageUri, String imageName, String rotation, String width, String height) {
+        this.isNew = isNew;
         this.type = type;
         this.text = text;
         this.align = align;

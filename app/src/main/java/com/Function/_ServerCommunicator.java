@@ -1,6 +1,7 @@
 package com.Function;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -57,13 +58,13 @@ public class _ServerCommunicator {
         };
         requestQueue.add(stringRequest);
     }
-    public void _Communicator(final VolleyCallback callback, final String request_type, final String request_value, final String request_data) {
+    public void _Communicator(final VolleyCallback callback, final String mode, final String code, final String pg , final String data) {
         RequestQueue requestQueue = Volley.newRequestQueue(context);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        callback.onSuccess(response, null);
+                        callback.onSuccess(response, "success");
                     }
 
                 }, new Response.ErrorListener() {
@@ -71,17 +72,18 @@ public class _ServerCommunicator {
             public void onErrorResponse(VolleyError error) {
 //                NetworkResponse networkResponse = error.networkResponse;
 //                Log.e("network response :: ", networkResponse.toString());
-//                Log.e("volley err :: ", error.toString());
-                callback.onSuccess(null, "connection_fail");
+                //  Log.e("volley err :: ", error.toString());
+                callback.onSuccess(null, "fail");
             }
         }) {
             @Override
             protected Map<String, String> getParams(){
                 Map<String, String> params= new HashMap<>();
-                params.put("access", "jhmn");
-                params.put("req", request_type); //type of requesting..
-                params.put("code", request_value); //value of requesting....
-                params.put("data", request_data);
+                params.put("key", "jhmn");
+                params.put("mode", mode); //type of requesting..
+                params.put("code", code); //value of requesting....
+                params.put("pg", pg);
+                params.put("data", data);
                 return params;
             }
         };

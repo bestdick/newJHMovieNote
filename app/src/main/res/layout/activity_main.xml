@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorBackground"
     tools:context=".MainActivity">
     <ProgressBar
         android:id="@+id/progressBar"
@@ -24,6 +25,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" >
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -34,20 +36,12 @@
                 android:layout_height="wrap_content"
                 android:text="JHMN"
                 android:textColor="@color/colorWhite"
-                android:textSize="24sp"
+                android:fontFamily="@font/kybo"
+                android:textSize="22sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/testnametextview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/colorWhite"
-                android:text="준훈노트"
-                app:layout_constraintBaseline_toBaselineOf="@+id/textView"
-                app:layout_constraintStart_toEndOf="@+id/textView" />
 
             <TextView
                 android:id="@+id/naviTextView"
@@ -57,7 +51,8 @@
                 android:layout_marginRight="16dp"
                 android:text="BoxOffice"
                 android:textColor="@color/colorWhite"
-                android:textSize="24sp"
+                android:fontFamily="@font/kybo"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -88,57 +83,67 @@
 
 <!--    </androidx.viewpager.widget.ViewPager>-->
 
-<LinearLayout
-    android:id="@+id/viewPager"
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:orientation="vertical"
-    app:layout_constraintBottom_toTopOf="@+id/tabLayout"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/toolbar"/>
+    <LinearLayout
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/tabLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/adConLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/viewPager">
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabItem01"
+            android:fontFamily="@font/kybo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Box\nOffice" />
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabItem02"
+            android:fontFamily="@font/kybo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="You\ntube" />
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabItem03"
+            android:fontFamily="@font/kybo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Main" />
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabItem04"
+            android:fontFamily="@font/kybo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Write" />
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabItem05"
+            android:fontFamily="@font/kybo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Setting" />
     </com.google.android.material.tabs.TabLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!-- <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/adConLayout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
@@ -147,7 +152,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tabLayout">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout> -->
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -18,6 +18,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.Adapter.MainViewPagerAdapter;
+import com.Function._ServerCommunicator;
 import com.MainFragments.BoxOfficeFragment;
 import com.MainFragments.MainFragment;
 import com.MainFragments.SettingFragment;
@@ -29,7 +30,11 @@ import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import static com.StaticValues.StaticValues.LOGIN_TYPE_DEVICE;
+import static com.StaticValues.StaticValues.baseURL;
 import static com.StaticValues.StaticValues.youtubeAPIKey;
 
 
@@ -51,16 +56,22 @@ public class MainActivity extends AppCompatActivity implements BoxOfficeFragment
     MainViewPagerAdapter mainViewPagerAdapter;
     TextView naviTextView;
 
-     public static String LoginType;
+    public static String LoginType;
     public static String deviceId;
-    public      static String deviceToken;
+    public static String deviceToken;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+
+
+
 
         Intent intent = getIntent();
-        LoginType = LOGIN_TYPE_DEVICE;
+        //LoginType = LOGIN_TYPE_DEVICE;
         deviceId = intent.getStringExtra("deviceID");
         deviceToken = intent.getStringExtra("deviceToken");
 
@@ -164,9 +175,6 @@ public class MainActivity extends AppCompatActivity implements BoxOfficeFragment
 
             }
         });
-
-
-
 
 
 

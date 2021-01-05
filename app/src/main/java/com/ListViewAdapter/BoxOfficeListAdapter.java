@@ -43,6 +43,7 @@ public class BoxOfficeListAdapter extends BaseAdapter {
         View headerView = View.inflate(context, R.layout.container_boxoffice_header, null);
         View v = View.inflate(context, R.layout.container_boxoffice_item, null);
         View v2 = View.inflate(context, R.layout.container_boxoffice_item_right, null);
+        //View footerView = View.inflate(context, R.layout.container_boxoffice_header, null);
         if(position == 0){
              headerView.setEnabled(false);
              TextView headerTextView = (TextView)headerView.findViewById(R.id.headerTextView);
@@ -63,15 +64,19 @@ public class BoxOfficeListAdapter extends BaseAdapter {
 
                 String rank = list.get(position).getBoxRank();
                 String rankChange = list.get(position).getBoxRankChange();
-                String movieName = rank + " " +list.get(position).getMovieName();
+                String movieName = "box "+rank + " " +list.get(position).getMovieName();
                 String naverImage = list.get(position).getNaverImage();
                 String director = "<strong><font color='#990000'>감독</font></strong>  " + list.get(position).getNaverDirector();
                 String actor = "<strong><font color='#990000'>배우</font></strong>  "+list.get(position).getNaverActor();
                 String openDate = "<strong><font color='#990000'>개봉일</font></strong>  "+list.get(position).getOpenDate();
                 String naverRate = "<strong><font color='#990000'>네이버 평점</font></strong>  "+ list.get(position).getNaverRating();
-                String audacc = "<strong><font color='#990000'>누적 관객</font></strong>  " + list.get(position).getAudiAcc();
+                String audacc = "<strong><font color='#990000'>누적 관객</font></strong>  " + list.get(position).getAudiAcc() + " 명";
 
-                Picasso.get().load(naverImage).into(boxOfficeImageView);
+
+                if( !naverImage.equals("")){
+                    Picasso.get().load(naverImage).into(boxOfficeImageView);
+                }
+
                 titleTextView.setText(Html.fromHtml(movieName));
                 bodirectorTextView.setText(Html.fromHtml(director));
                 boactorTextView.setText(Html.fromHtml(actor));
@@ -93,15 +98,18 @@ public class BoxOfficeListAdapter extends BaseAdapter {
 
                 String rank = list.get(position).getBoxRank();
                 String rankChange = list.get(position).getBoxRankChange();
-                String movieName = rank + " " +list.get(position).getMovieName();
+                String movieName = "box "+rank + " " +list.get(position).getMovieName();
                 String naverImage = list.get(position).getNaverImage();
                 String director = "<strong><font color='#990000'>감독</font></strong>  " + list.get(position).getNaverDirector();
                 String actor = "<strong><font color='#990000'>배우</font></strong>  "+list.get(position).getNaverActor();
                 String openDate = "<strong><font color='#990000'>개봉일</font></strong>  "+list.get(position).getOpenDate();
                 String naverRate = "<strong><font color='#990000'>네이버 평점</font></strong>  "+ list.get(position).getNaverRating();
-                String audacc = "<strong><font color='#990000'>누적 관객</font></strong>  " + list.get(position).getAudiAcc();
+                String audacc = "<strong><font color='#990000'>누적 관객</font></strong>  " + list.get(position).getAudiAcc()+ " 명";
 
-                Picasso.get().load(naverImage).into(boxOfficeImageView);
+
+                if( !naverImage.equals("") ){
+                    Picasso.get().load(naverImage).into(boxOfficeImageView);
+                }
                 titleTextView.setText(Html.fromHtml(movieName));
                 bodirectorTextView.setText(Html.fromHtml(director));
                 boactorTextView.setText(Html.fromHtml(actor));

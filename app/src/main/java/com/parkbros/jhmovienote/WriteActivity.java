@@ -2,6 +2,7 @@ package com.parkbros.jhmovienote;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,6 +39,7 @@ import com.Function._ServerCommunicator;
 import com.WriteRecyclerViewFunction.ItemMoveCallback;
 import com.WriteRecyclerViewFunction.RecyclerViewAdapter;
 import com.WriteRecyclerViewFunction.StartDragListener;
+import com.theartofdev.edmodo.cropper.CropImage;
 import com.yalantis.ucrop.UCrop;
 
 import org.json.JSONArray;
@@ -67,6 +69,7 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
 
 
     int tabPosition;
+    int selectPosition;
 
     Dialog_Write_Select_Text_Image dialog;
     Dialog_Write_Submit submitDialog;
@@ -85,6 +88,7 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
 
         Intent intent = getIntent();
         tabPosition = intent.getIntExtra("tabPosition", -1);
+        selectPosition = 0;
 
 
         list = new ArrayList<WriteBean>();
@@ -105,7 +109,7 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
     }
     private void populateRecyclerView() {
         WriteBean titleItem = new WriteBean(
-                "title", null,null,null,null,null,null,null,null
+                "new", "title", null,null,null,null,null,null,null,null
         );
         list.add(titleItem);
         mAdapter = new RecyclerViewAdapter(WriteActivity.this, list, this);
@@ -146,6 +150,7 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
                         startActivityForResult(intent, 9009);
 
                     }else{
+                        selectPosition = rv.getChildAdapterPosition(child);
                         dialog = new Dialog_Write_Select_Text_Image(WriteActivity.this, new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -160,10 +165,12 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
                             @Override
                             public void onClick(View v) {
                                 //image
-                                Intent intent = new Intent(WriteActivity.this, _WriteActivity.class);
+                                openImagesDocument();
+
+                                /*Intent intent = new Intent(WriteActivity.this, _WriteActivity.class);
                                 intent.putExtra("type", "image");
                                 intent.putExtra("position", rv.getChildAdapterPosition(child));
-                                startActivityForResult(intent, 9009);
+                                startActivityForResult(intent, 9009);*/
 
 //                            Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
 //                            photoPickerIntent.setType("image/*");
@@ -194,6 +201,41 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
             }
         });
 
+    }
+
+
+    private void startCrop(Uri uri){
+        CropImage.activity(uri).start(WriteActivity.this);
+    }
+
+    private float[] ViewSize(int imageWidth, int imageHeight){
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        int height = size.y;
+
+        float ratio = (float)width/imageWidth;
+
+        float newHeight = (float) imageHeight*ratio;
+
+
+        float[] returnSize = new float[2];
+        returnSize[0] = (float) width;
+        returnSize[1] = newHeight;
+        return returnSize;
+    }
+
+
+    private void openImagesDocument() {
+        Intent pictureIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        pictureIntent.setType("image/*");  // 1
+        pictureIntent.addCategory(Intent.CATEGORY_OPENABLE);  // 2
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            String[] mimeTypes = new String[]{"image/jpeg", "image/png"};  // 3
+            pictureIntent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+        }
+        startActivityForResult(Intent.createChooser(pictureIntent, "Select Picture"), 9999);  // 4
     }
 
     private boolean preventFalseUpload(){
@@ -242,11 +284,11 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
         boolean preventor = preventFalseUpload();
         if (preventor) {
             progressBar.setVisibility(View.VISIBLE);
-            String url = baseURL + "/upload";
+            String url = baseURL;
             String request_type = "";
             String request_data = ArrayListtoJSONArray(status).toString();
             _ServerCommunicator serverCommunicator = new _ServerCommunicator(WriteActivity.this, url);
-            serverCommunicator.Communicator(new _ServerCommunicator.VolleyCallback() {
+            serverCommunicator._Communicator(new _ServerCommunicator.VolleyCallback() {
                 @Override
                 public void onSuccess(String result, String connection) {
                     Log.e("upload:::::", result);
@@ -266,7 +308,7 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
                         Toast.makeText(WriteActivity.this, "업로드 실패", Toast.LENGTH_LONG).show();
                     }
                 }
-            }, request_type, request_data);
+            }, "write","","", request_data);
         } else {
             Toast.makeText(WriteActivity.this, "작성하지 않은 항목이 있습니다.", Toast.LENGTH_LONG).show();
         }
@@ -359,8 +401,11 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
                 int position = data.getIntExtra("position", -1);
 
 
-//                Log.e("RESULT INTENT ", type +"// "+ position+ "//"+result);
+                Log.e("RESULT INTENT ", type +"// "+ position);
 
+                Log.e("LIST LENGTH 1",  String.valueOf(list.size()) );
+
+//                Log.e("what is this empty" , list.get(position).getIsNew().toString() );
 
                 WriteBean item;
                 String result;
@@ -368,7 +413,7 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
                 switch (type){
                     case "text":
                          result = data.getStringExtra("result");
-                         item = new WriteBean(type, result, null, null,null,null,null, null, null);
+                         item = new WriteBean("new", type, result, null, null,null,null,null, null, null);
                         list.set(position, item);
                         break;
                     case "image":
@@ -376,29 +421,31 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
                         String currentDateandTime = sdf.format(new Date());
                         String imageName = deviceId + "_"+ currentDateandTime+"_"+position+".jpeg";
-                         item = new WriteBean(type, null, null, null,imageUri,imageName, null,null, null);
+                         item = new WriteBean("new", type, null, null, null,imageUri,imageName, null,null, null);
                         list.set(position, item);
                         break;
                     case "title":
                         result = data.getStringExtra("result");
-                        item = new WriteBean(type, result, null, null,null,null, null,null, null);
+                        item = new WriteBean("new", type, result, null, null,null,null, null,null, null);
                         list.set(position, item);
                         break;
                     default:
-                         item = new WriteBean(type, null, null, null,null,null, null,null, null);
+                         item = new WriteBean("new", type, null, null, null,null,null, null,null, null);
                         list.set(position, item);
                         break;
 
                 }
 
+                Log.e("LIST LENGTH 2",  String.valueOf(list.size()) );
+                if( (position+1) == list.size() ) {
+                    WriteBean newitem = new WriteBean(
+                            "new", "empty", null, null, null, null, null, null, null, null
+                    );
+                    list.add(newitem);
+                }
 
-
-
-                WriteBean newitem = new WriteBean(
-                        "empty", null,null,null,null,null,null,null,null
-                );
-                list.add(newitem);
                 mAdapter.notifyDataSetChanged();
+
 
 
 //                for (int i = 0 ; i < list.size(); i ++){
@@ -409,8 +456,66 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
             }else{
                 Log.e("NO INTENT RESULT", "NO RESULT");
             }
-        }else{
+        }else if( requestCode == 9999 ) {
+            Uri sourceUri = data.getData(); // 1
+            startCrop(sourceUri);
+        }else if(requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE){
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                Uri resultUri = result.getUri();
+                Bitmap bitmap;
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(WriteActivity.this. getContentResolver(), resultUri);
+//                    Log.e("REAL SIZE :", "w:"+ tempBitmap.getWidth() + "// h:"+tempBitmap.getHeight() + "// byte :"+ tempBitmap.getByteCount());
 
+//                    bitmap = getResizedBitmap(tempBitmap, 100);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    bitmap = null;
+                }
+//                Log.e("COMPRESS SIZE :", "w:"+ bitmap.getWidth() + "// h:"+bitmap.getHeight()+ "// byte :"+ bitmap.getByteCount());
+                int width = bitmap.getWidth();
+                int height =bitmap.getHeight();
+
+                float[] imageSize = ViewSize(width, height);
+                //ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams((int)imageSize[0], (int)imageSize[1]);
+                //imageView.setLayoutParams(layoutParams);
+                //imageView.setImageBitmap(bitmap);
+//                imageView.setImageURI(resultUri);
+                //imageUri  = resultUri.toString();
+                WriteBean item;
+                Uri imageUri = result.getUri();
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
+                String currentDateandTime = sdf.format(new Date());
+                String imageName = deviceId + "_"+ currentDateandTime+"_"+selectPosition+".jpeg";
+                item = new WriteBean("new", "image", null, null, null,imageUri,imageName, null,null, null);
+                list.set(selectPosition, item);
+
+                mAdapter.notifyDataSetChanged();
+
+                if( (selectPosition+1) == list.size() ) {
+                    WriteBean newitem = new WriteBean(
+                            "new", "empty", null, null, null, null, null, null, null, null
+                    );
+                    list.add(newitem);
+                }
+            }
+
+
+
+
+        }else{
+            /*Uri imageUri ;
+            WriteBean item ;
+
+            Log.e("REQUEST not 9009 9999", String.valueOf(requestCode));
+            imageUri = Uri.parse(data.getStringExtra("imageUri"));
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
+            String currentDateandTime = sdf.format(new Date());
+            String imageName = deviceId + "_"+ currentDateandTime+"_"+position+".jpeg";
+            item = new WriteBean("new", type, null, null, null,imageUri,imageName, null,null, null);
+            list.set(position, item);*/
         }
     }
 

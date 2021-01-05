@@ -32,7 +32,8 @@ public class _YoutubeActivity extends YouTubeBaseActivity {
         listener = new YouTubePlayer.OnInitializedListener() {
             @Override
             public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
-                youTubePlayer.loadVideo(videoId); //
+                youTubePlayer.loadVideo( videoId ); //
+                //youTubePlayer.setFullscreen( true ) ;
                 //https://www.youtube.com/watch?v=NmkYHmiNArc 유투브에서 v="" 이부분이 키에 해당
             }
 

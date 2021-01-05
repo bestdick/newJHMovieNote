@@ -7,6 +7,7 @@ public class YoutubeChannelBean {
         String channelTitle;
         String channelThumbnailUrl;
 
+
     public String getChannelThumbnailUrl() {
         return channelThumbnailUrl;
     }

@@ -112,9 +112,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter implements ItemMov
             case TYPE_TITLE:
                 View titleItemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.container_write_letter_item, parent, false);
                 return new MyViewHolder(titleItemView);
-                default:
-                    View emptyitemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.container_write_letter_item, parent, false);
-                    return new MyViewHolder(emptyitemView);
+            default:
+                View emptyitemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.container_write_letter_item, parent, false);
+                return new MyViewHolder(emptyitemView);
 
         }
     }

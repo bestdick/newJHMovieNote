@@ -16,11 +16,19 @@ import android.widget.ProgressBar;
 import com.AsyncTasks.MainFragmentBackgroundTask;
 import com.Beans.MainFragBeen;
 import com.Function.OnFragmentInteractionListener;
+import com.Function._ServerCommunicator;
 import com.ListViewAdapter.BoxOfficeListAdapter;
 import com.ListViewAdapter.MainfragmentListAdapter;
 import com.parkbros.jhmovienote.R;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+
+import static com.StaticValues.StaticValues.baseURL;
+import static com.parkbros.jhmovienote.MainActivity.deviceId;
+import static com.parkbros.jhmovienote.MainActivity.deviceToken;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -75,20 +83,48 @@ public class MainFragment extends Fragment {
         }
     }
 
+    View rootView;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ListView listView = (ListView) rootView.findViewById(R.id.mainListView);
         ArrayList<MainFragBeen> list= new ArrayList<>();
         MainfragmentListAdapter adapter = new MainfragmentListAdapter(getContext(), list);
         listView.setAdapter(adapter);
 
-        MainFragmentBackgroundTask bt = new MainFragmentBackgroundTask(getContext(), listView, list, progressBar, adapter);
-        bt.execute();
+        //MainFragmentBackgroundTask bt = new MainFragmentBackgroundTask(getContext(), listView, list, progressBar, adapter);
+        //bt.execute();
+        _initialLoader();
+
+
         return rootView;
     }
+
+    public void _initialLoader(){
+        String mode = "main";
+        String code = "my_list";
+        JSONObject data = new JSONObject();
+        try {
+             data.put("device_id", deviceId);
+            data.put("device_token", deviceToken);
+        } catch (JSONException e) {
+             e.printStackTrace();
+        }
+
+        String stringified_data = data.toString();
+
+        _ServerCommunicator serverCommunicator = new _ServerCommunicator(getContext(), baseURL);
+        serverCommunicator._Communicator(new _ServerCommunicator.VolleyCallback() {
+            @Override
+            public void onSuccess(String result, String connection) {
+                Log.e("mainfrag result : ", result);
+            }
+        }, mode, code, "0", stringified_data ) ;
+    }
+
+
 
 //    // TODO: Rename method, update argument and hook method into UI event
 //    public void onButtonPressed(Uri uri) {

@@ -3,31 +3,49 @@ package com.ListViewAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.fragment.app.Fragment;
+
+import com.Beans.YoutubeChannelBean;
 import com.Beans.YoutubeFragBean;
+//import com.MainFragments.ChannelList;
+import com.MainFragments.YoutubeFragment;
+import com.SpinnerAdapter.channelSpinnerAdapter;
 import com.parkbros.jhmovienote.MainActivity;
 import com.parkbros.jhmovienote.R;
 import com.parkbros.jhmovienote._YoutubeActivity;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import static com.MainFragments.YoutubeFragment.pg;
 
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
 public class YoutubefragmentListAdapter extends BaseAdapter {
     Context context;
     ArrayList<YoutubeFragBean> list;
+    YoutubeFragment youtubeFragment;
 
-    public YoutubefragmentListAdapter(Context context, ArrayList<YoutubeFragBean> list) {
+
+
+    public YoutubefragmentListAdapter(Context context, ArrayList<YoutubeFragBean> list, YoutubeFragment youtubeFragment ) {
         this.context = context;
         this.list = list;
+        this.youtubeFragment = youtubeFragment;
+
     }
 
     @Override
@@ -57,8 +75,10 @@ public class YoutubefragmentListAdapter extends BaseAdapter {
                 return randomHeaderView;
             case 1002:
                 View youtubeRandomThumbnailView = View.inflate(context, R.layout.container_youtubefrag_thumbnail, null);
+
+                final ProgressBar pb = (ProgressBar) youtubeRandomThumbnailView.findViewById(R.id.progressBar);
                 ImageView randomVideothumbnailImageView = (ImageView) youtubeRandomThumbnailView.findViewById(R.id.youtubeImageView);
-                ImageView randomChannelThumbnailImageView = (ImageView) youtubeRandomThumbnailView.findViewById(R.id.channelThumbnailImageView);
+                final ImageView randomChannelThumbnailImageView = (ImageView) youtubeRandomThumbnailView.findViewById(R.id.channelThumbnailImageView);
                 TextView randomVideoTitleTextView = (TextView) youtubeRandomThumbnailView.findViewById(R.id.titleTextView);
                 TextView randomChannelTitleTextView = (TextView) youtubeRandomThumbnailView.findViewById(R.id.channelTitleTextView);
 
@@ -66,11 +86,21 @@ public class YoutubefragmentListAdapter extends BaseAdapter {
                 Picasso.get()
                         .load(list.get(position).getThumbnailUrl())
                         .resize((int) size1002[0], (int) (size1002[1]))
-                        .into(randomVideothumbnailImageView);
+                        .into(randomVideothumbnailImageView, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                pb.setVisibility( View.GONE );
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                Log.e( "load image err: ", e.toString() );
+                            }
+                        });
                 Picasso.get()
                         .load(list.get(position).getChannelThumbnail())
                         .transform(new CropCircleTransformation())
-                        .into(randomChannelThumbnailImageView);
+                        .into(randomChannelThumbnailImageView);//채널 썸네일
                 randomVideoTitleTextView.setText(list.get(position).getTitle());
                 randomChannelTitleTextView.setText(list.get(position).getChannelTitle());
 
@@ -78,6 +108,7 @@ public class YoutubefragmentListAdapter extends BaseAdapter {
                 OnClickView(youtubeRandomThumbnailView, position);
                 return youtubeRandomThumbnailView;
             case 1003:
+                // ----- channel list ------
                 View selectHeaderView = View.inflate(context, R.layout.container_youtube_channel_selection_header, null);
                 ImageView selectHeaderImageView = (ImageView) selectHeaderView.findViewById(R.id.imageView);
                 TextView selectHeaderTextView = (TextView) selectHeaderView.findViewById(R.id.subtitleTextView);
@@ -91,9 +122,27 @@ public class YoutubefragmentListAdapter extends BaseAdapter {
                         .transform(new CropCircleTransformation())
                         .into(selectHeaderImageView);
 
+                Spinner channelListSpinner  = ( Spinner ) selectHeaderView.findViewById(R.id.dropdownList);
+                channelSpinnerAdapter _channelSpinnerAdapter = new channelSpinnerAdapter( context, list.get( position ).getChannelList() , this );
+                channelListSpinner.setAdapter( _channelSpinnerAdapter );
+                channelListSpinner.setSelection(0);
+
+                channelListSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        Log.e("item select", "select : " +list.size() );
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
+                    }
+                }) ;
+
                 return selectHeaderView;
             case 1004:
                 View youtubeThumbnailView = View.inflate(context, R.layout.container_youtubefrag_thumbnail, null);
+                final ProgressBar pb4 = (ProgressBar) youtubeThumbnailView.findViewById(R.id.progressBar);
                 ImageView videothumbnailImageView = (ImageView) youtubeThumbnailView.findViewById(R.id.youtubeImageView);
                 ImageView channelThumbnailImageView = (ImageView) youtubeThumbnailView.findViewById(R.id.channelThumbnailImageView);
                 TextView videoTitleTextView = (TextView) youtubeThumbnailView.findViewById(R.id.titleTextView);
@@ -103,7 +152,17 @@ public class YoutubefragmentListAdapter extends BaseAdapter {
                 Picasso.get()
                             .load(list.get(position).getThumbnailUrl())
                             .resize((int) size1004[0], (int) (size1004[1]))
-                            .into(videothumbnailImageView);
+                            .into(videothumbnailImageView, new Callback() {
+                                @Override
+                                public void onSuccess() {
+                                    pb4.setVisibility( View.GONE );
+                                }
+
+                                @Override
+                                public void onError(Exception e) {
+
+                                }
+                            });
                 Picasso.get()
                         .load(list.get(position).getChannelThumbnail())
                         .transform(new CropCircleTransformation())
@@ -113,7 +172,17 @@ public class YoutubefragmentListAdapter extends BaseAdapter {
 
                 OnClickView(youtubeThumbnailView, position);
                 return youtubeThumbnailView;
+            case 1005 :
 
+                View seemore = View.inflate(context, R.layout.container_youtube_channel_seemore, null);
+                seemore.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        pg ++ ;
+                        ( (YoutubeFragment) youtubeFragment )._initialLoader("select", list.get(0).getChannelId());
+                    }
+                });
+                return seemore;
                 default:
                     return null;
         }

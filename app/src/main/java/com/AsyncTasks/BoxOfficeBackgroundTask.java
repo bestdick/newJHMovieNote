@@ -56,10 +56,10 @@ public class BoxOfficeBackgroundTask extends AsyncTask<String, Integer, String> 
             e.printStackTrace();
         }
         String data = jsonObject_rd.toString();
-        _ServerCommunicator serverCommunicator = new _ServerCommunicator(context, url);
-        serverCommunicator._Communicator(new _ServerCommunicator.VolleyCallback() {
-            @Override
-            public void onSuccess(String result, String connection) {
+            _ServerCommunicator serverCommunicator = new _ServerCommunicator(context, url);
+            serverCommunicator._Communicator(new _ServerCommunicator.VolleyCallback() {
+                @Override
+                public void onSuccess(String result, String connection) {
                 Log.e("BOXOFFICE RESULT", result);
                 try {
                     JSONObject jsonObject =new JSONObject(result);
@@ -104,7 +104,7 @@ public class BoxOfficeBackgroundTask extends AsyncTask<String, Integer, String> 
                 }
                 progressBar.setVisibility(View.GONE);
             }
-        }, req, code, data);
+        }, req, code, "0", data);
 
 //            for(int i=0; i< 10000; i++)
 //            {

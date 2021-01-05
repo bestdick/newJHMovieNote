@@ -18,6 +18,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import static com.StaticValues.StaticValues.baseURL;
+import static com.StaticValues.StaticValues.localURL;
+import static com.StaticValues.StaticValues.remoteURL;
 
 public class EnteranceActivity extends AppCompatActivity {
 
@@ -29,9 +31,71 @@ public class EnteranceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_enterance);
 
 
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        DeviceInfoManager();
+        //progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        //DeviceInfoManager();
+
+        //DeviceInfoManager_v2();
+
+        //GotoLoung("test", "test");
+
+        check_server();
     }
+    private void check_server(){
+        _ServerCommunicator serverCommunicator = new _ServerCommunicator(EnteranceActivity.this, remoteURL);
+        serverCommunicator._Communicator(new _ServerCommunicator.VolleyCallback() {
+            @Override
+            public void onSuccess(String result, String connection) {
+                Log.e("connection", connection);
+                if ( connection.equals("success") ){
+                    baseURL = remoteURL;
+                    DeviceInfoManager_v2();
+                }else{
+                    baseURL = localURL;
+                    DeviceInfoManager_v2();
+                }
+            }
+        }, "urlcheck", "", "","" );
+    }
+
+    private void DeviceInfoManager_v2(){
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( EnteranceActivity.this,  new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                String mToken = instanceIdResult.getToken();
+                String[] temp = mToken.split(":");
+                final String device_id = temp[0].trim();
+                final String device_token = temp[1].trim();
+                Log.e("FCM TOKEN ID", mToken);
+
+                String mode ="firebase";
+                String code ="";
+                String pg = "";
+                String data ="";
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("device_id", device_id);
+                    jsonObject.put("device_token", device_token);
+                    data = jsonObject.toString();
+
+                    _ServerCommunicator serverCommunicator = new _ServerCommunicator(EnteranceActivity.this, baseURL);
+                    serverCommunicator._Communicator(new _ServerCommunicator.VolleyCallback() {
+                        @Override
+                        public void onSuccess(String result, String connection) {
+                            if( connection.equals("success")){
+                                Log.e("result :" , result );
+                                GotoLoung(device_id, device_token);
+                            }
+                        }
+                    }, mode, code, pg, data );
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+    }
+
+
     private void DeviceInfoManager(){
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( EnteranceActivity.this,  new OnSuccessListener<InstanceIdResult>() {
             @Override
@@ -84,7 +148,7 @@ public class EnteranceActivity extends AppCompatActivity {
                             }
 
                         }
-                    }, req, code, data);
+                    }, req, code, "0",data);
                 } else{
                     //deviceinfo 가 존재하지만 toke 값의 변화가 없을떄나 변화가 있을때나 무조건 업데이트 한다....
                     Bundle deviceInfo = getDeviceInfo();
@@ -140,7 +204,7 @@ public class EnteranceActivity extends AppCompatActivity {
                                 }
 
                             }
-                        }, req, code, request_data);
+                        }, req, code, "0", request_data);
 
                 }
             }

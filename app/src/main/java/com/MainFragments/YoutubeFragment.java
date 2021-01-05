@@ -5,9 +5,12 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Debug;
 import android.util.Log;
@@ -16,6 +19,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -24,9 +29,11 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.Beans.BoxOfficeBean;
 import com.Beans.YoutubeChannelBean;
 import com.Beans.YoutubeFragBean;
 import com.Function.OnFragmentInteractionListener;
@@ -44,7 +51,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.lang.reflect.Array;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.zip.Inflater;
 
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
@@ -111,32 +125,249 @@ public class YoutubeFragment extends Fragment {
 //    LinearLayout selectedChannellistLinearLayout;
 //    ScrollView scrollView;
 
+    SwipeRefreshLayout swipeRefreshLayout;
     View rootView;
     ListView listView;
     YoutubefragmentListAdapter listAdapter;
     ArrayList<YoutubeFragBean> list;
 
-     String channelId;
+    String channelId;
     boolean hitBottom;
+    public static int pg = 1 ;
+
+
+    LinearLayout channelList_linearLayout ;
+    HorizontalScrollView horizontalScrollView2 ;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView =inflater.inflate(R.layout.fragment_youtube, container, false);
+        swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swiperefresh);
+
+        horizontalScrollView2 = ( HorizontalScrollView ) rootView.findViewById(R.id.horizontalScrollView2);
+        channelList_linearLayout = ( LinearLayout ) rootView.findViewById(R.id.horizontalScrollView);
+
         channelId = null;
         list = new ArrayList<>();
         hitBottom = false;
         listView = (ListView)rootView.findViewById(R.id.youtubeListView);
-        listAdapter = new YoutubefragmentListAdapter(getContext(), list);
+        listAdapter = new YoutubefragmentListAdapter(getContext(), list, this );
         listView.setAdapter(listAdapter);
 
-        initialLoader(rootView);
+        /*initialLoader(rootView);
+        FetchMoreItemToList();*/
 
-        FetchMoreItemToList();
+        _initialLoader(  "rand", "");
+
+
+//        listView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+//                Log.e("click : ", String.valueOf(i));
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> adapterView) {
+//
+//            }
+//        });
+
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Log.e("refresh","refresh");
+
+                swipeRefreshLayout.setRefreshing( false );
+            }
+        });
         return rootView;
+    }
+
+    public void _initialLoader(final String _code , final String channel_id ){
+        String url = baseURL;
+        String mode = "youtube";
+        String code = _code;
+        JSONObject data = new JSONObject();
+        if( !_code.equals("rand")){
+            try {
+                data.put("channel_id", channel_id);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        String stringified_data = data.toString();
+
+        _ServerCommunicator serverCommunicator = new _ServerCommunicator(getContext(), url);
+        serverCommunicator._Communicator(new _ServerCommunicator.VolleyCallback() {
+            @Override
+            public void onSuccess(String result, String connection) {
+                Log.e("RESUT : ", result);
+                if( connection == "success" ){
+                    if( !_code.equals("rand")) {
+                        if ( pg != 1) {
+
+                            Log.e("size of list", String.valueOf( list.size() ) + " // " + String.valueOf( pg ) );
+                            list.remove( list.size() - 1 );
+                            listAdapter.notifyDataSetChanged();
+                        }
+                    }
+                    Log.e("size of list", String.valueOf( list.size() ) + " // " + String.valueOf( pg ) );
+                    try {
+                        JSONObject jsonObject = new JSONObject(result);
+                        JSONArray channel_list = jsonObject.getJSONObject("msg").getJSONArray("channel_list");
+                        draw_channel_list( _code, channel_list ); // drawing channellist ...
+                        JSONArray movie_list = jsonObject.getJSONObject("msg").getJSONArray("video_list");
+                        draw_vieo_list( movie_list );
+                    }catch (JSONException e){
+                        Log.e("JSON Err", e.toString() );
+                    }
+                    // --- add see more on if code is not rand
+                    if( !_code.equals("rand")) {
+                        YoutubeFragBean footer = new YoutubeFragBean(  // each channel header ....
+                                1005, channel_id, "", "", "", "", "", "", null);
+                        list.add(footer);
+                    }
+                    listAdapter.notifyDataSetChanged();
+                    /*try {
+                        JSONObject jsonObject = new JSONObject(result);
+                        int res = jsonObject.getInt("res");
+
+
+                        if( res == 0 ) {
+
+                            JSONArray _channel_list = jsonObject.getJSONObject("msg").getJSONArray("channel_list");
+                            ArrayList<YoutubeChannelBean> channel_list  = new ArrayList<YoutubeChannelBean>();
+                            for( int i = 0 ; i < _channel_list.length(); i ++){
+                                YoutubeChannelBean item = new YoutubeChannelBean(_channel_list.getJSONObject(i).getString("channelid"), _channel_list.getJSONObject(i).getString("channelname"), _channel_list.getJSONObject(i).getString("thumbnail"));
+                                channel_list.add( item );
+                            }
+
+                            JSONObject random_video = jsonObject.getJSONObject("msg").getJSONObject("random_item");
+                            JSONArray movie_list = jsonObject.getJSONObject("msg").getJSONArray("movie_list");
+
+                            YoutubeFragBean randomItemHeader = new YoutubeFragBean(
+                                    1001, null, null, null,
+                                    null, null,null,null, null );
+
+                            YoutubeFragBean randomItemMain = new YoutubeFragBean(
+                                    1002, random_video.getString("channel_id"), random_video.getString("channel_thumbnail"),
+                                    random_video.getString("title"), random_video.getString("description"),
+                                    random_video.getString("video_thumbnail"), random_video.getString("channel_title"),
+                                    random_video.getString("video_id"), null );
+
+                            YoutubeFragBean  selectHeader = new YoutubeFragBean(  // each channel header ....
+                                    1003, random_video.getString("channel_id"), random_video.getString("channel_thumbnail"),
+                                    random_video.getString("title"), random_video.getString("description"),
+                                    random_video.getString("video_thumbnail"), random_video.getString("channel_title"),
+                                    random_video.getString("video_id") , channel_list );
+
+
+
+                            list.add(randomItemHeader);
+                            list.add( randomItemMain );
+                            list.add( selectHeader ) ;
+
+                            for( int i = 0 ; i < movie_list.length() ; i ++ ) {
+                                YoutubeFragBean selectItem = new YoutubeFragBean(
+                                        1004, movie_list.getJSONObject(i).getString("channel_id"), movie_list.getJSONObject(i).getString("channel_thumbnail"),
+                                        movie_list.getJSONObject(i).getString("title"), movie_list.getJSONObject(i).getString("description"),
+                                        movie_list.getJSONObject(i).getString("video_thumbnail"), movie_list.getJSONObject(i).getString("channel_title"),
+                                        movie_list.getJSONObject(i).getString("video_id"), null );
+                                list.add( selectItem ) ;
+                            }
+                            listAdapter.notifyDataSetChanged();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }*/
+                }
+                progressBar.setVisibility(View.GONE);
+            }
+
+        }, mode, code, String.valueOf( pg ), stringified_data);
+    }
+    private void draw_vieo_list ( JSONArray movie_list ) throws JSONException {
+        for( int i = 0 ; i < movie_list.length() ; i ++ ) {
+            YoutubeFragBean selectItem = new YoutubeFragBean(
+                    1004, movie_list.getJSONObject(i).getString("channel_id"), movie_list.getJSONObject(i).getString("channel_thumbnail"),
+                    movie_list.getJSONObject(i).getString("title"), movie_list.getJSONObject(i).getString("description"),
+                    movie_list.getJSONObject(i).getString("video_thumbnail"), movie_list.getJSONObject(i).getString("channel_title"),
+                    movie_list.getJSONObject(i).getString("video_id"), null );
+            list.add( selectItem ) ;
+        }
+    }
+    private void draw_channel_list( String _code , JSONArray channel_list ) throws JSONException {
+        // --- 추천 5
+        channelList_linearLayout.removeAllViews();// set to initial;
+
+
+        View channel_title_view  = getLayoutInflater().inflate(R.layout.container_youtube_channelid, null);
+        TextView title_textView = (TextView) channel_title_view.findViewById(R.id.channelTitleTextView);
+        ImageView channel_imageView = (ImageView) channel_title_view.findViewById(R.id.channelThumbnailImageView);
+
+        title_textView.setText( " 추천 ");
+        channelList_linearLayout.addView( channel_title_view );
+        select_channel(channel_title_view, "rand" );
+
+        if( _code.equals("rand") ) {
+            channel_title_view.setBackground(getResources().getDrawable(R.drawable.channel_container_box));
+        }
+
+
+        for( int i = 0 ; i < channel_list.length() ; i ++ ){
+
+            View _channel_title_view  = getLayoutInflater().inflate(R.layout.container_youtube_channelid, null);
+            TextView _title_textView = (TextView) _channel_title_view.findViewById(R.id.channelTitleTextView);
+            ImageView _channel_imageView = (ImageView) _channel_title_view.findViewById(R.id.channelThumbnailImageView);
+
+
+            _title_textView.setText( channel_list.getJSONObject(i).getString("channelname") ) ;
+
+
+            Picasso.get()
+                    .load( channel_list.getJSONObject(i).getString("thumbnail") )
+                    .transform(new CropCircleTransformation())
+                    .into( _channel_imageView ) ;//채널 썸네일
+            channelList_linearLayout.addView( _channel_title_view );
+
+            String channel_id = channel_list.getJSONObject(i).getString("channel_id");
+            select_channel( _channel_title_view, channel_id );
+
+            if( !_code.equals("rand") ) {
+                if( i == 0 ) {
+                    _channel_title_view.setBackground(getResources().getDrawable(R.drawable.channel_container_box));
+                }
+            }
+        }
+
+        //channelList_linearLayout.scrollTo(0, 0 );
+        horizontalScrollView2.scrollTo(0, 0 );
 
     }
+
+    private void select_channel( View channel_title_view , final String channel_id){
+        channel_title_view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Log.e("channel_clicked :: ",  channel_id );
+                String code = ( channel_id.equals("rand") ) ? "rand" : "select";
+                pg = 1 ;
+                list.clear();
+                _initialLoader( code , channel_id );
+
+
+            }
+        });
+    }
+
+
+
+
+
     private void FetchMoreItemToList(){
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -148,7 +379,7 @@ public class YoutubeFragment extends Fragment {
                         Log.e("LAST ROW", "LAST :: " + channelId);
                         progressBar.setVisibility(View.VISIBLE);
                         hitBottom = true;
-                        getMoreListOfSelectedChannelId();
+                        //getMoreListOfSelectedChannelId();
 
                     }
                 }
@@ -196,7 +427,7 @@ public class YoutubeFragment extends Fragment {
             return jsonObject.toString();
         }
     }
-    private void initialLoader(final View rootView){
+  /*  private void initialLoader(final View rootView){
 
         String URL = baseURL+"/protocol/protocol_main.php";
 
@@ -312,7 +543,7 @@ public class YoutubeFragment extends Fragment {
 //                    fetChMoreList();
 
 
-
+horizontalScrollView
                     LinearLayout channelTitleListLinearLayout = (LinearLayout) rootView.findViewById(R.id.youtuber_list_container);
                     ArrayList<YoutubeChannelBean> channelList = new ArrayList<>();
                     JSONArray AllChannelJsonArray = jsonObject.getJSONArray("allChannelIds");
@@ -361,9 +592,9 @@ public class YoutubeFragment extends Fragment {
 
             }
         }, request_type, request_data);
-    }
+    }*/
 
-    private void getListOfSelectedChannelId(){
+    /*private void getListOfSelectedChannelId(){
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("channelId", channelId);
@@ -471,7 +702,7 @@ public class YoutubeFragment extends Fragment {
 
             }
         }, request_type, request_data);
-    }
+    }*/
     private float[] ViewSize(){
         Display display = getActivity().getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -532,6 +763,8 @@ public class YoutubeFragment extends Fragment {
         mListener = null;
         Log.e("YoutubeFragment :: ", "Detach");
     }
+
+
 //
 //    /**
 //     * This interface must be implemented by activities that contain this

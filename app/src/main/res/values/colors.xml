@@ -23,6 +23,7 @@
     <color name="colorLightGray">#DFDFDB</color>
     <color name="colorLigherGray">#E7E7E7</color>
     <color name= "colorLightestGray">#F4F4F4</color>
+    <color name="colorBackground">#F5F5F5</color>
 
     <color name="colorMediumLightGray">#EBEBEB</color>
 </resources>

@@ -21,12 +21,17 @@ import com.Beans.BoxOfficeBean;
 import com.Function.OnFragmentInteractionListener;
 import com.Function._ServerCommunicator;
 import com.ListViewAdapter.BoxOfficeListAdapter;
+import com.parkbros.jhmovienote.MainActivity;
 import com.parkbros.jhmovienote.R;
 import com.parkbros.jhmovienote._BoxOfficeActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import static com.StaticValues.StaticValues.baseURL;
@@ -94,15 +99,84 @@ public class BoxOfficeFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_box_office, container, false);
         ListView listView = (ListView) rootView.findViewById(R.id.boxOfficeListView);
-
-
         list = new ArrayList<>();
         boxOfficeListAdapter = new BoxOfficeListAdapter(getContext(), list);
         listView.setAdapter(boxOfficeListAdapter);
-        BoxOfficeBackgroundTask bt = new BoxOfficeBackgroundTask(getContext(), listView, list, progressBar, boxOfficeListAdapter);
+        /*BoxOfficeBackgroundTask bt = new BoxOfficeBackgroundTask(getContext(), listView, list, progressBar, boxOfficeListAdapter);
         bt.execute();
 
-        OnClickItemOnList(listView);
+        OnClickItemOnList(listView);*/
+
+
+
+
+        String url = baseURL;
+        String mode = "box";
+        String code = "a";
+        JSONObject data = new JSONObject();
+        String stringified_data = data.toString();
+        _ServerCommunicator serverCommunicator = new _ServerCommunicator(getContext(), url);
+        serverCommunicator._Communicator(new _ServerCommunicator.VolleyCallback() {
+            @Override
+            public void onSuccess(String result, String connection) {
+                Log.e( "머지? : ", result );
+                if( connection == "success" ){
+                    try {
+                        JSONObject jsonObject = new JSONObject( result );
+                        int res = jsonObject.getInt("res");
+                        if( res == 0 ){
+                            String uptime = jsonObject.getJSONObject("msg").getString("uptime");
+                            uptime+="000";
+                            //Log.e( "uptime  : ",  uptime ) ;
+                            Date date = new Date( Long.parseLong( uptime )  );
+                            SimpleDateFormat dateFormat1 =new SimpleDateFormat("yyyy.MM.dd");
+                            SimpleDateFormat dateFormat2 =new SimpleDateFormat("HH:mm:ss");
+                            String date_str = dateFormat1.format( date );
+                            String time_str = dateFormat2.format( date );
+
+                            BoxOfficeBean header = new BoxOfficeBean(1001, date_str, time_str, null,
+                                    null, null, null, null, null,
+                                    null, null, null,
+                                    null, null, null, null);
+                            list.add(header);
+
+                            JSONArray boxJSONArray = jsonObject.getJSONObject("msg").getJSONArray("boxinfo");
+                            for( int i = 0 ; i < boxJSONArray.length(); i++) {
+
+                                //Log.e( "image ::", boxJSONArray.getJSONObject(i).getString("image") );
+                                BoxOfficeBean item = new BoxOfficeBean(1001, null, null,
+                                        boxJSONArray.getJSONObject(i).getString("moviename"),
+                                        boxJSONArray.getJSONObject(i).getString("rnum"),
+                                        null,
+                                        boxJSONArray.getJSONObject(i).getString("openDt"),
+                                        boxJSONArray.getJSONObject(i).getString("audiAcc"),
+                                        null,
+                                        null,
+                                        boxJSONArray.getJSONObject(i).getString("naverLink"),
+                                        boxJSONArray.getJSONObject(i).getString("image"),
+                                        boxJSONArray.getJSONObject(i).getString("subTitle"),
+                                        boxJSONArray.getJSONObject(i).getString("director"),
+                                        boxJSONArray.getJSONObject(i).getString("actor"),
+                                        boxJSONArray.getJSONObject(i).getString("userRate"));
+                                list.add(item);
+                            }
+
+                            boxOfficeListAdapter.notifyDataSetChanged();
+                            progressBar.setVisibility(View.GONE);
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
+            }
+
+        }, mode, code, "0", stringified_data);
+
+
+
         return rootView;
     }
 
@@ -143,7 +217,7 @@ public class BoxOfficeFragment extends Fragment {
 //            throw new RuntimeException(context.toString()
 //                    + " must implement OnFragmentInteractionListener");
 //        }
-        Log.e("BoxofficeFragment :: ", "Attached");
+        Log.e("BoxofficeFragment ::", "Attached");
     }
 
     @Override
