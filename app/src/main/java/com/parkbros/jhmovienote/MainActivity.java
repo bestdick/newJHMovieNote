@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements BoxOfficeFragment
     TextView naviTextView;
 
     public static String LoginType;
+    public static int uid;
     public static String deviceId;
     public static String deviceToken;
 
@@ -72,8 +73,12 @@ public class MainActivity extends AppCompatActivity implements BoxOfficeFragment
 
         Intent intent = getIntent();
         //LoginType = LOGIN_TYPE_DEVICE;
-        deviceId = intent.getStringExtra("deviceID");
+        uid = intent.getIntExtra("uid", 0);
+        deviceId = intent.getStringExtra("deviceId");
         deviceToken = intent.getStringExtra("deviceToken");
+
+        Log.e("device id ", deviceId);
+        Log.e("uid ", String.valueOf( uid ) );
 
         container = (LinearLayout) findViewById(R.id.viewPager);
         naviTextView = (TextView) findViewById(R.id.naviTextView);
@@ -198,11 +203,11 @@ public class MainActivity extends AppCompatActivity implements BoxOfficeFragment
                 mTabLayout.getTabAt(2).select();
                 naviTextView.setText("Main");
 
-                FragmentTransaction  fragmentTransaction = fragmentManager.beginTransaction();
+                /*FragmentTransaction  fragmentTransaction = fragmentManager.beginTransaction();
                 MainFragment mainFragment = new MainFragment();
                 mainFragment.newInstance("null", "null", progressBar);
                 fragmentTransaction.replace(R.id.viewPager, mainFragment);
-                fragmentTransaction.commit();
+                fragmentTransaction.commit();*/
             }else
 //                (result.equals("cancel"))
             {

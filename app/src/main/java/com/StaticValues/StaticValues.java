@@ -13,8 +13,8 @@ public class StaticValues {
     final public static String LOGIN_TYPE_DEVICE = "device";
     final public static String LOGIN_TYPE_KAKAO = "kakao";
 
-    final public static String WRITE_CONTENT_STATUS_PUBLIC = "public";
-    final public static String WRITE_CONTENT_STATUS_PRIVATE = "private";
+    final public static String WRITE_CONTENT_STATUS_PUBLIC = "pub";
+    final public static String WRITE_CONTENT_STATUS_PRIVATE = "pri";
     final public static String WRITE_CONTENT_STATUS_DELETED = "deleted";
 
 }

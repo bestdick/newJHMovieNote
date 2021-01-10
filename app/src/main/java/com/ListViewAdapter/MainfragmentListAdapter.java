@@ -70,7 +70,44 @@ public class MainfragmentListAdapter extends BaseAdapter {
 
                 return viewMyStatus;
             case 1003:
-                if(position%2 == 0){
+                View viewMyListViewLeft = View.inflate(context, R.layout.container_mainfrag_list_item_left, null);
+                TextView titleTextView = (TextView)viewMyListViewLeft.findViewById(R.id.titleTextView);
+                TextView authorTextView = (TextView) viewMyListViewLeft.findViewById(R.id.authorTextView);
+                //TextView plotTextView = (TextView) viewMyListViewLeft.findViewById(R.id.plotTextView);
+                TextView uploaddateTextView = (TextView) viewMyListViewLeft.findViewById(R.id.uploaddateTextView);
+                TextView hitTextView = (TextView) viewMyListViewLeft.findViewById(R.id.hitTextView);
+                //TextView likeTextView = (TextView) viewMyListViewLeft.findViewById(R.id.likeTextView);
+
+                ImageView imageView = (ImageView) viewMyListViewLeft.findViewById(R.id.itemImageView);
+
+                String titleString = list.get(position).getTitle();
+                String authorString = list.get(position).getAuthorName();
+                //String plotString = list.get(position).getDescription();
+                String dateString = list.get(position).getDate();
+                String hitString = list.get(position).getHit();
+//                    String likeString = list.get(position).ge
+
+                titleTextView.setText(titleString);
+                authorTextView.setText(authorString);
+                //plotTextView.setText(plotString);
+                uploaddateTextView.setText(dateString);
+                hitTextView.setText(hitString);
+
+                titleTextView.setText(titleString);
+                if(list.get(position).getThumbnailUrl() != null){
+                    String[] imageName = list.get(position).getThumbnailUrl().split("/");
+                    Picasso.get()
+                            .load(baseURL+"/getThumbnailImages/"+imageName[3]+"/"+imageName[4])
+                            .into(imageView);
+                }else{
+                    Picasso.get()
+                            .load(R.drawable.empty_image)
+                            .into(imageView);
+                }
+
+
+                return viewMyListViewLeft;
+                /*if(position%2 == 0){
                     View viewMyListViewLeft = View.inflate(context, R.layout.container_mainfrag_list_item_left, null);
                     TextView titleTextView = (TextView)viewMyListViewLeft.findViewById(R.id.titleTextView);
                     TextView authorTextView = (TextView) viewMyListViewLeft.findViewById(R.id.authorTextView);
@@ -145,13 +182,13 @@ public class MainfragmentListAdapter extends BaseAdapter {
 
 
                     return viewMyListViewRight;
-                }
+                }*/
             case 1004:
                 TextView shareTitleTextView = (TextView)viewHeaderLikeView.findViewById(R.id.subtitleTextView);
                 shareTitleTextView.setText("Share List");
                 return viewHeaderLikeView;
             case 1005:
-                if(position%2 == 0){
+                /*if(position%2 == 0){
                     View viewShareListViewLeft = View.inflate(context, R.layout.container_mainfrag_list_item_left, null);
                     TextView titleTextView = (TextView)viewShareListViewLeft.findViewById(R.id.titleTextView);
                     TextView authorTextView = (TextView) viewShareListViewLeft.findViewById(R.id.authorTextView);
@@ -226,7 +263,7 @@ public class MainfragmentListAdapter extends BaseAdapter {
                                 .into(imageView);
                     }
                     return viewShareListViewRight;
-                }
+                }*/
             case 1006:
                 TextView etcTitleTextView = (TextView)viewHeaderLikeView.findViewById(R.id.subtitleTextView);
                 etcTitleTextView.setText("Etc");

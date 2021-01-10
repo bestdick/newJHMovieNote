@@ -59,6 +59,7 @@ import static com.StaticValues.StaticValues.WRITE_CONTENT_STATUS_PUBLIC;
 import static com.StaticValues.StaticValues.baseURL;
 import static com.parkbros.jhmovienote.MainActivity.LoginType;
 import static com.parkbros.jhmovienote.MainActivity.deviceId;
+import static com.parkbros.jhmovienote.MainActivity.uid;
 
 public class WriteActivity extends AppCompatActivity implements StartDragListener {
 
@@ -109,7 +110,7 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
     }
     private void populateRecyclerView() {
         WriteBean titleItem = new WriteBean(
-                "new", "title", null,null,null,null,null,null,null,null
+                "new", "title", null,null,null,null,null,null,null,null, null, null , false
         );
         list.add(titleItem);
         mAdapter = new RecyclerViewAdapter(WriteActivity.this, list, this);
@@ -292,21 +293,27 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
                 @Override
                 public void onSuccess(String result, String connection) {
                     Log.e("upload:::::", result);
+                    try {
+                        JSONObject jsonObject = new JSONObject( result );
+                        int res = jsonObject.getInt("res");
+                        if ( res == 0 ){
+                            submitDialog.dismiss();
+                            progressBar.setVisibility(View.GONE);
+                            Toast.makeText(WriteActivity.this, "업로드 완료", Toast.LENGTH_LONG).show();
+                            Intent intent = new Intent();
+                            intent.putExtra("result", "success");
+                            setResult(Activity.RESULT_OK, intent);
+                            finish();
+                        }else{
+                            submitDialog.dismiss();
+                            progressBar.setVisibility(View.GONE);
 
-                    if (result.equals("upload_success")) {
-                        submitDialog.dismiss();
-                        progressBar.setVisibility(View.GONE);
-                        Toast.makeText(WriteActivity.this, "업로드 완료", Toast.LENGTH_LONG).show();
-                        Intent intent = new Intent();
-                        intent.putExtra("result", "success");
-                        setResult(Activity.RESULT_OK, intent);
-                        finish();
-                    } else {
-                        submitDialog.dismiss();
-                        progressBar.setVisibility(View.GONE);
-
-                        Toast.makeText(WriteActivity.this, "업로드 실패", Toast.LENGTH_LONG).show();
+                            Toast.makeText(WriteActivity.this, "업로드 실패", Toast.LENGTH_LONG).show();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
+
                 }
             }, "write","","", request_data);
         } else {
@@ -330,13 +337,17 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
                 _jsonObject.put("align", list.get(i).getAlign());
                 _jsonObject.put("fontsize", list.get(i).getFontsize());
                 if(list.get(i).getImageUri() == null){
-                    _jsonObject.put("imageString", null);
+//                    _jsonObject.put("imageString", null);
                     _jsonObject.put("imageName", null);
-                    _jsonObject.put("originalImageString", null);
+//                    _jsonObject.put("originalImageString", null);
+                    _jsonObject.put("cacheImage", null);
+                    _jsonObject.put("imageExt", null);
                 }else{
-                    _jsonObject.put("imageString", ImageToBase64(i));
+//                    _jsonObject.put("imageString", ImageToBase64(i));
                     _jsonObject.put("imageName", list.get(i).getImageName());
-                    _jsonObject.put("originalImageString", OriginalImageToBase64(i));
+//                    _jsonObject.put("originalImageString", OriginalImageToBase64(i));
+                    _jsonObject.put("cacheImage", cacheImage(i));
+                    _jsonObject.put("imageExt", list.get(i).getImage_ext() );
                 }
                 _jsonObject.put("rotation", list.get(i).getRotation());
                 _jsonObject.put("width", list.get(i).getWidth());
@@ -345,6 +356,7 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
                 jsonArray.put(_jsonObject);
         }
             jsonObject.put("loginType", LoginType);
+            jsonObject.put("uid", uid);
             jsonObject.put("deviceId", deviceId);
             jsonObject.put("content", jsonArray);
             jsonObject.put("status", status);
@@ -372,6 +384,21 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
     }
     private String OriginalImageToBase64(int position){
         Uri imageUri = list.get(position).getImageUri();
+        Bitmap bitmap = null;
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(WriteActivity.this. getContentResolver(), imageUri);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 75, baos);
+        byte[] imageBytes = baos.toByteArray();
+
+        final String imageString = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+        return imageString;
+    }
+    private String cacheImage(int position){
+        Uri imageUri = list.get(position).getCacheImageUri();
         Bitmap bitmap = null;
         try {
             bitmap = MediaStore.Images.Media.getBitmap(WriteActivity.this. getContentResolver(), imageUri);
@@ -413,24 +440,24 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
                 switch (type){
                     case "text":
                          result = data.getStringExtra("result");
-                         item = new WriteBean("new", type, result, null, null,null,null,null, null, null);
+                         item = new WriteBean("new", type, result, null, null,null,null,null, null, null, null, null, false);
                         list.set(position, item);
                         break;
                     case "image":
-                        imageUri = Uri.parse(data.getStringExtra("imageUri"));
+                        /*imageUri = Uri.parse(data.getStringExtra("imageUri"));
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
                         String currentDateandTime = sdf.format(new Date());
                         String imageName = deviceId + "_"+ currentDateandTime+"_"+position+".jpeg";
-                         item = new WriteBean("new", type, null, null, null,imageUri,imageName, null,null, null);
+                         item = new WriteBean("new", type, null, null, null,imageUri,imageName, null,null, null, null);
                         list.set(position, item);
-                        break;
+                        break;*/
                     case "title":
                         result = data.getStringExtra("result");
-                        item = new WriteBean("new", type, result, null, null,null,null, null,null, null);
+                        item = new WriteBean("new", type, result, null, null,null,null, null,null, null, null, null, false);
                         list.set(position, item);
                         break;
                     default:
-                         item = new WriteBean("new", type, null, null, null,null,null, null,null, null);
+                         item = new WriteBean("new", type, null, null, null,null,null, null,null, null, null, null, false);
                         list.set(position, item);
                         break;
 
@@ -439,7 +466,7 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
                 Log.e("LIST LENGTH 2",  String.valueOf(list.size()) );
                 if( (position+1) == list.size() ) {
                     WriteBean newitem = new WriteBean(
-                            "new", "empty", null, null, null, null, null, null, null, null
+                            "new", "empty", null, null, null, null, null, null, null, null, null, null, false
                     );
                     list.add(newitem);
                 }
@@ -457,12 +484,17 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
                 Log.e("NO INTENT RESULT", "NO RESULT");
             }
         }else if( requestCode == 9999 ) {
-            Uri sourceUri = data.getData(); // 1
-            startCrop(sourceUri);
+            /*Log.e("RESULT CODE ", String.valueOf( resultCode ) );*/
+            if (resultCode == RESULT_OK ){
+                Uri sourceUri = data.getData(); // 1
+                startCrop(sourceUri);
+            }
+
         }else if(requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE){
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
                 Uri resultUri = result.getUri();
+
                 Bitmap bitmap;
                 try {
                     bitmap = MediaStore.Images.Media.getBitmap(WriteActivity.this. getContentResolver(), resultUri);
@@ -486,17 +518,23 @@ public class WriteActivity extends AppCompatActivity implements StartDragListene
                 WriteBean item;
                 Uri imageUri = result.getUri();
 
+                Log.e( "image uri : ", imageUri.toString() );
+                String[] img_dir = imageUri.toString().split("/");
+                String tmp_image_name = img_dir[img_dir.length - 1] ;
+                String img_ext = tmp_image_name.split("\\.")[1];
+
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
-                String currentDateandTime = sdf.format(new Date());
-                String imageName = deviceId + "_"+ currentDateandTime+"_"+selectPosition+".jpeg";
-                item = new WriteBean("new", "image", null, null, null,imageUri,imageName, null,null, null);
+                String currentDateandTime = sdf.format( new Date() ) ;
+                String imageName = deviceId + "_"+ currentDateandTime+"_"+selectPosition;
+                Log.e(" image name : ", imageName );
+                item = new WriteBean("new", "image", null, null, null,imageUri, imageName, null,null, null ,resultUri, img_ext , false);
                 list.set(selectPosition, item);
 
                 mAdapter.notifyDataSetChanged();
 
                 if( (selectPosition+1) == list.size() ) {
                     WriteBean newitem = new WriteBean(
-                            "new", "empty", null, null, null, null, null, null, null, null
+                            "new", "empty", null, null, null, null, null, null, null, null, null, null, false
                     );
                     list.add(newitem);
                 }

@@ -65,7 +65,8 @@ public class EnteranceActivity extends AppCompatActivity {
                 String[] temp = mToken.split(":");
                 final String device_id = temp[0].trim();
                 final String device_token = temp[1].trim();
-                Log.e("FCM TOKEN ID", mToken);
+                //Log.e("FCM TOKEN DEVICE ID ", device_id);
+                //Log.e("FCM TOKEN ID", mToken);
 
                 String mode ="firebase";
                 String code ="";
@@ -76,6 +77,9 @@ public class EnteranceActivity extends AppCompatActivity {
                     jsonObject.put("device_id", device_id);
                     jsonObject.put("device_token", device_token);
                     data = jsonObject.toString();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
                     _ServerCommunicator serverCommunicator = new _ServerCommunicator(EnteranceActivity.this, baseURL);
                     serverCommunicator._Communicator(new _ServerCommunicator.VolleyCallback() {
@@ -83,13 +87,23 @@ public class EnteranceActivity extends AppCompatActivity {
                         public void onSuccess(String result, String connection) {
                             if( connection.equals("success")){
                                 Log.e("result :" , result );
-                                GotoLoung(device_id, device_token);
+                                try {
+                                    JSONObject jsonObject1 = new JSONObject( result ) ;
+                                    int res = jsonObject1.getInt("res");
+                                    if ( res  == 0 ){
+                                        String uid = jsonObject1.getJSONObject("msg").getString("uid");
+                                        GotoLoung(Integer.parseInt(uid), device_id, device_token);
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+
+
                             }
                         }
                     }, mode, code, pg, data );
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+
 
             }
         });
@@ -134,7 +148,7 @@ public class EnteranceActivity extends AppCompatActivity {
                                 if(res) {
                                     OffProgressBar();
 //                                    GotoRegister(deviceID, deviceToken);
-                                    GotoLoung(deviceID, deviceToken);
+                                    GotoLoung(1, deviceID, deviceToken);
                                 }
 
 //                                int response_result = resultJsonObject.getInt("response");
@@ -182,7 +196,7 @@ public class EnteranceActivity extends AppCompatActivity {
                                     if(res) {
                                         OffProgressBar();
 //                                    GotoRegister(deviceID, deviceToken);
-                                        GotoLoung(deviceID, deviceToken);
+                                        GotoLoung(1, deviceID, deviceToken);
                                     }else{
                                         Log.e("Enterance ERR::", resultJsonObject.toString());
                                     }
@@ -218,8 +232,9 @@ public class EnteranceActivity extends AppCompatActivity {
         progressBar.setVisibility(View.GONE);
     }
 
-    private void GotoLoung(String deviceID, String deviceToken){
+    private void GotoLoung(int uid, String deviceID, String deviceToken){
         Intent intent = new Intent(EnteranceActivity.this, MainActivity.class);
+        intent.putExtra("uid", uid);
         intent.putExtra("deviceId", deviceID);
         intent.putExtra("deviceToken", deviceToken);
         startActivity(intent);

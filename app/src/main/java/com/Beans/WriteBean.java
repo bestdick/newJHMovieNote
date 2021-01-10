@@ -13,9 +13,13 @@ public class WriteBean {
 
     Uri imageUri;
     String imageName;
+
     String rotation;
     String width;
     String height;
+    Uri cacheImageUri;
+    String image_ext;
+    boolean titleImage ;
 
     public String getIsNew() {
         return isNew;
@@ -97,7 +101,31 @@ public class WriteBean {
         this.height = height;
     }
 
-    public WriteBean(String isNew , String type, String text, String align, String fontsize, Uri imageUri, String imageName, String rotation, String width, String height) {
+    public Uri getCacheImageUri() {
+        return cacheImageUri;
+    }
+
+    public void setCacheImageUri(Uri cacheImageUri) {
+        this.cacheImageUri = cacheImageUri;
+    }
+
+    public String getImage_ext() {
+        return image_ext;
+    }
+
+    public void setImage_ext(String image_ext) {
+        this.image_ext = image_ext;
+    }
+
+    public boolean isTitleImage() {
+        return titleImage;
+    }
+
+    public void setTitleImage(boolean titleImage) {
+        this.titleImage = titleImage;
+    }
+
+    public WriteBean(String isNew, String type, String text, String align, String fontsize, Uri imageUri, String imageName, String rotation, String width, String height, Uri cacheImageUri, String image_ext, boolean titleImage) {
         this.isNew = isNew;
         this.type = type;
         this.text = text;
@@ -108,5 +136,8 @@ public class WriteBean {
         this.rotation = rotation;
         this.width = width;
         this.height = height;
+        this.cacheImageUri = cacheImageUri;
+        this.image_ext = image_ext;
+        this.titleImage = titleImage;
     }
 }

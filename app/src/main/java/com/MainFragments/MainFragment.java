@@ -21,6 +21,7 @@ import com.ListViewAdapter.BoxOfficeListAdapter;
 import com.ListViewAdapter.MainfragmentListAdapter;
 import com.parkbros.jhmovienote.R;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import static com.StaticValues.StaticValues.baseURL;
 import static com.parkbros.jhmovienote.MainActivity.deviceId;
 import static com.parkbros.jhmovienote.MainActivity.deviceToken;
+import static com.parkbros.jhmovienote.MainActivity.uid;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -107,7 +109,8 @@ public class MainFragment extends Fragment {
         String code = "my_list";
         JSONObject data = new JSONObject();
         try {
-             data.put("device_id", deviceId);
+            data.put("uid", uid ) ;
+            data.put("device_id", deviceId);
             data.put("device_token", deviceToken);
         } catch (JSONException e) {
              e.printStackTrace();
@@ -120,6 +123,22 @@ public class MainFragment extends Fragment {
             @Override
             public void onSuccess(String result, String connection) {
                 Log.e("mainfrag result : ", result);
+                if( connection.equals("success")){
+                    try {
+                        JSONObject jsonObject = new JSONObject( result );
+                        int res = jsonObject.getInt("res");
+                        if( res == 0 ){
+                            int page = jsonObject.getJSONObject("msg").getInt("pg_start" ); 
+                            JSONArray list = jsonObject.getJSONObject("msg").getJSONArray("list" ) ;
+                            for( int i = 0 ; i < list.length() ; i++ ){
+
+                            }
+                        }
+                        
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }, mode, code, "0", stringified_data ) ;
     }
