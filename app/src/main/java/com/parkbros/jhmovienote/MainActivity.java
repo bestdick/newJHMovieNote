@@ -70,10 +70,10 @@ public class MainActivity extends AppCompatActivity implements BoxOfficeFragment
 
 
 
-
+/*
         Intent intent = getIntent();
         //LoginType = LOGIN_TYPE_DEVICE;
-        uid = intent.getIntExtra("uid", 0);
+        //uid = intent.getIntExtra("uid", 0);
         deviceId = intent.getStringExtra("deviceId");
         deviceToken = intent.getStringExtra("deviceToken");
 
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements BoxOfficeFragment
 
 
 
-
+*/
 
         mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener(){
             @Override

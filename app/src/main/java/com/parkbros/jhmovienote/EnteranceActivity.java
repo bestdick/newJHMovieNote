@@ -1,6 +1,7 @@
 package com.parkbros.jhmovienote;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,15 +9,37 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import com.Function.ServerCommunicator_v2;
 import com.Function._ServerCommunicator;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.parkbros.jhmovienote.databinding.ActivityEnteranceBinding;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.ObservableEmitter;
+import io.reactivex.rxjava3.core.ObservableOnSubscribe;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
+import static com.StaticValues.EnvLib.__BASE_URL__;
+import static com.StaticValues.EnvLib.__CONN_FAIL__;
+import static com.StaticValues.EnvLib.__CONN_SUCCESS__;
+import static com.StaticValues.EnvLib.fcm_idx;
 import static com.StaticValues.StaticValues.baseURL;
 import static com.StaticValues.StaticValues.localURL;
 import static com.StaticValues.StaticValues.remoteURL;
@@ -24,22 +47,151 @@ import static com.StaticValues.StaticValues.remoteURL;
 public class EnteranceActivity extends AppCompatActivity {
 
     ProgressBar progressBar;
-
+    EnteranceVariable enteranceVariable ;
+    final String TAG = "EnteranceActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //ActivityEnteranceBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_enterance);
+
         setContentView(R.layout.activity_enterance);
 
+        //binding.setUser(new EnteranceVariable("test1", "test2"));
+        //enteranceVariable = new EnteranceVariable(null, null);
+
+
+        DeviceInfoManager_v3();
 
         //progressBar = (ProgressBar) findViewById(R.id.progressBar);
         //DeviceInfoManager();
 
         //DeviceInfoManager_v2();
 
-        //GotoLoung("test", "test");
+        //GotoLoung("test", "test")
+        //check_server();
+/*
+        Observable<Bundle> ob = Observable
+                .create(new ObservableOnSubscribe<Bundle>() {
+                    @Override
+                    public void subscribe(@NonNull ObservableEmitter<Bundle> emitter) throws Throwable {
+                        __BASE_URL__ = remoteURL;
+                        Map<String, String> params = new HashMap<>();
+                        ServerCommunicator_v2 serverCommunicator_v2 = new ServerCommunicator_v2(EnteranceActivity.this, __BASE_URL__  );
+                        serverCommunicator_v2._Communicator(new ServerCommunicator_v2.VolleyCallback() {
+                            @Override
+                            public void onSuccess(int res, String data) {
+                                Log.e( TAG, res + " / " + data);
+                                Bundle bundle = new Bundle();
+                                bundle.putString("0", "hahahaha");
+                                emitter.onNext(bundle);
+                                emitter.onComplete();
+                            }
+                        }, params );
 
-        check_server();
+
+
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+
+        ob.subscribe(new Observer<Bundle>() {
+            @Override
+            public void onSubscribe(@NonNull Disposable d) {
+
+            }
+            @Override
+            public void onNext(@NonNull Bundle bundle) {
+                Log.e(TAG , "onNext " );
+                String tmp = bundle.getString("0");
+                enteranceVariable.setTest1( tmp );
+                enteranceVariable.setTest2( "test2333333333333333331222221");
+
+            }
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+
+            }
+            @Override
+            public void onComplete() {
+                Log.e(TAG , "Complete");
+                binding.setUser(enteranceVariable);
+            }
+        });
+
+ */
     }
+
+    private void ServerChechk(){
+        Map<String, String> params = new HashMap<>();
+        String url = "http://192.168.219.155:80/p_jhmovienote/protocol/main.ptc.php";
+        //String url = "http://122.46.245.107:12188/p_jhmovienote/protocol/main.ptc.php";
+        ServerCommunicator_v2 serverCommunicator = new ServerCommunicator_v2( this ,  url );
+        serverCommunicator._Communicator(new ServerCommunicator_v2.VolleyCallback() {
+            @Override
+            public void onSuccess(int  res, String data )  {
+                Log.e( TAG , res +" / " +data);
+                if( res == __CONN_SUCCESS__ ){
+                    __BASE_URL__ = "http://192.168.219.155:80/p_jhmovienote/protocol/main.ptc.php";
+                }else{
+                    __BASE_URL__ =  "http://122.46.245.107:12188/p_jhmovienote/protocol/main.ptc.php";
+
+                }
+                DeviceInfoManager_v3();
+            }
+        }, params );
+    }
+
+
+
+    private void DeviceInfoManager_v3(){
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@androidx.annotation.NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.e(TAG, "Fetching FCM registration token failed", task.getException());
+                            // --- do nothing ---
+                        }else{
+                            // ---- update server ----
+                            String token = task.getResult();
+
+                            Map<String, String> params = new HashMap<>();
+                            params.put("mode", "20001" );
+                            params.put( "deviceToken", token );
+                            ServerCommunicator_v2 serverCommunicator = new ServerCommunicator_v2(EnteranceActivity.this, __BASE_URL__ );
+                            serverCommunicator._Communicator(new ServerCommunicator_v2.VolleyCallback() {
+                                @Override
+                                public void onSuccess(int res, String data) {
+
+                                    if( res == __CONN_SUCCESS__ ){
+                                        Log.e(TAG, data);
+                                        try {
+                                            JSONObject jsonObject = new JSONObject(data);
+                                            if( jsonObject.getInt("res") == 0 ) {
+                                                fcm_idx = jsonObject.getJSONObject("msg").getInt("fcm_idx");
+                                                Intent intent = new Intent( EnteranceActivity.this , com.NewMovieNote.activities.MainActivity.class);
+                                                intent.putExtra( "fcm_id" , token.split(":")[0] );
+                                                intent.putExtra( "fcm_token" , token.split(":")[1] );
+                                                startActivity( intent );
+                                                finish();
+                                            }
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                    }else if ( res == __CONN_FAIL__ ){
+                                        Toast.makeText( EnteranceActivity.this , "Connection Fail" , Toast.LENGTH_LONG).show();
+                                    }
+                                }
+                            }, params );
+                        }
+
+                    }
+                });
+    }
+
+
     private void check_server(){
         _ServerCommunicator serverCommunicator = new _ServerCommunicator(EnteranceActivity.this, remoteURL);
         serverCommunicator._Communicator(new _ServerCommunicator.VolleyCallback() {
@@ -432,4 +584,30 @@ public class EnteranceActivity extends AppCompatActivity {
 //            }
 //        });
 //    }
+
+    public class EnteranceVariable{
+        String test1;
+        String test2;
+
+        public EnteranceVariable(String test1, String test2) {
+            this.test1 = test1;
+            this.test2 = test2;
+        }
+
+        public String getTest1() {
+            return test1;
+        }
+
+        public void setTest1(String test1) {
+            this.test1 = test1;
+        }
+
+        public String getTest2() {
+            return test2;
+        }
+
+        public void setTest2(String test2) {
+            this.test2 = test2;
+        }
+    }
 }
