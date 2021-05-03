@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,30 +65,41 @@ public class YoutubeSuggestionFragment extends Fragment {
         }
     }
 
+    final private String TAG = "YoutubeSuggestionFrag";
+
+    private int page = 0 ;
+    private String channelId = "rand";
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView =  inflater.inflate(R.layout.fragment_youtube_suggestion, container, false);
 
+
         YoutubeItemViewModel youtubeItemViewModel = new YoutubeItemViewModel();
+        youtubeItemViewModel.InitResources( getContext() );
         youtubeItemViewModel.InitYoutubeChannel();
         youtubeItemViewModel.getYoutubeChannelItemModel().observe(this, new Observer<List<YoutubeChannelItemModel>>() {
             @Override
             public void onChanged(List<YoutubeChannelItemModel> youtubeChannelItemModels) {
-
+                LogE( "youtubechannelItemModels changed : " + youtubeChannelItemModels.toString() );
             }
         });
 
         youtubeItemViewModel.getYoutubeSuggestionItemModel().observe(this, new Observer<List<YoutubeSuggestionItemModel>>() {
             @Override
             public void onChanged(List<YoutubeSuggestionItemModel> youtubeSuggestionItemModels) {
-
+                LogE( "youtubeSuggestionItemModels changed" + youtubeSuggestionItemModels .toString() );
             }
         });
 
+        youtubeItemViewModel.fetchYoutubeChannelList();
+        youtubeItemViewModel.fetchYoutubeSuggestionList(page, channelId);
+
         return rootView ;
     }
-
+    private void LogE( String msg ){
+        Log.e( TAG, msg );
+    }
 
 }

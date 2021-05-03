@@ -45,7 +45,7 @@ public class BoxItemViewModel extends ViewModel {
 
     public void fetchBoxInfo( String type ){
         Map<String, String> params = new HashMap<>();
-        params.put("mode", "30020" );
+        params.put("mode", "30010" );
         params.put("movie_type", type );
         ServerCommunicator_v2 serverCommunicator = new ServerCommunicator_v2( context , __BASE_URL__ );
         serverCommunicator._Communicator(new ServerCommunicator_v2.VolleyCallback() {
